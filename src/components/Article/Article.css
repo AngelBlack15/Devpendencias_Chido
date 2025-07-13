@@ -1,0 +1,176 @@
+/* Estilos para el contenedor principal */
+.article-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+/* Estilos para el encabezado */
+.article-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.logo-container {
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.logo-container:hover {
+  opacity: 0.8;
+}
+
+.article-logo {
+  height: 50px;
+  width: auto;
+}
+
+.contact-button {
+  background-color: #00bcd4;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.contact-button:hover {
+  background-color: #00acc1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para el contenido principal */
+.article-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.article-title {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: #232122;
+  line-height: 1.2;
+}
+
+/* Estilos para las etiquetas */
+.article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.tag {
+  background-color: #f0f0f0;
+  color: #555;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Estilos para la descripción */
+.article-description {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  color: #444;
+}
+
+/* Estilos para la imagen */
+.article-image-container {
+  margin: 2.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.article-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.article-image:hover {
+  transform: scale(1.02);
+}
+
+/* Estilos para el botón de acción */
+.article-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.visit-button {
+  display: inline-block;
+  background-color: #00bcd4;
+  color: white;
+  text-decoration: none;
+  padding: 1rem 2.5rem;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+}
+
+.visit-button:hover {
+  background-color: #00acc1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 188, 212, 0.2);
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .article-container {
+    padding: 1rem;
+  }
+  
+  .article-title {
+    font-size: 2rem;
+  }
+  
+  .article-description {
+    font-size: 1rem;
+  }
+  
+  .article-image-container {
+    margin: 1.5rem -1rem;
+    border-radius: 0;
+  }
+  
+  .visit-button {
+    width: 100%;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .article-title {
+    font-size: 1.7rem;
+  }
+  
+  .article-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .contact-button {
+    width: 100%;
+  }
+}

@@ -1,20 +1,17 @@
-// routes/links.js
-import { Router }               from 'express';
+import { Router }                from 'express';
 import { body, validationResult } from 'express-validator';
-import Link                      from '../models/Link.js';
+import Link                       from '../models/Link.js';
 
 const router = Router();
 
-// Crear enlace
+// Crear enlace (visits y likes arrancan en 0)
 router.post('/',
-  body('title').notEmpty().withMessage('Título obligatorio'),
-  body('url').isURL().withMessage('URL inválida'),
-  body('tags').isArray({ min: 1 }).withMessage('Debes enviar al menos una etiqueta'),
-  body('tags.*').isString().withMessage('Etiqueta inválida'),
+  body('title').notEmpty(),
+  body('url').isURL(),
+  body('tags').isArray({ min: 1 }),
   (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() });
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     Link.create(req.body)
       .then(doc => res.status(201).json(doc))
@@ -22,7 +19,7 @@ router.post('/',
   }
 );
 
-// Listar enlaces
+// Listar
 router.get('/', async (req, res) => {
   try {
     const all = await Link.find().sort('-createdAt');
@@ -32,16 +29,16 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Actualizar
+// Actualizar (incluir likes y visits)
 router.put('/:id',
-  body('title').notEmpty().withMessage('Título obligatorio'),
-  body('url').isURL().withMessage('URL inválida'),
-  body('tags').isArray({ min: 1 }).withMessage('Debes enviar al menos una etiqueta'),
-  body('tags.*').isString().withMessage('Etiqueta inválida'),
+  body('title').optional().notEmpty(),
+  body('url').optional().isURL(),
+  body('tags').optional().isArray(),
+  body('likes').optional().isInt({ min: 0 }),
+  body('visits').optional().isInt({ min: 0 }),
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() });
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     try {
       const link = await Link.findByIdAndUpdate(req.params.id, req.body, { new: true });

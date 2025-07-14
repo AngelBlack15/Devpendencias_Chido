@@ -1,11 +1,14 @@
+//rc/components/ResourcesPage/ResourcesPage.tsx
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AnimatedButton from '../ui/AnimatedButton';
 import LoginForm from '../auth/LoginForm';
 import './ResourcesPage.css';
 
+const API_BASE = 'http://localhost:3000/api';
+
 interface Post {
-  id: number;
+  id: string;
   title: string;
   excerpt: string;
   date: string;
@@ -28,21 +31,8 @@ const tags = [
   'MongoDB', 'PostgreSQL', 'GraphQL', 'Docker', 'AWS', 'Git'
 ];
 
-// Datos de ejemplo para los posts
-const posts = Array(9).fill(0).map((_, index) => ({
-  id: index + 1,
-  title: `Título del post ${index + 1}`,
-  excerpt: 'Este es un resumen del post que puede tener varias líneas de texto para dar una vista previa del contenido completo que se mostrará en la página de detalles.',
-  date: '17 Jun 2023',
-  visits: Math.floor(Math.random() * 1000) + 50, // Número aleatorio de visitas
-  likes: Math.floor(Math.random() * 100),
-  isLiked: false,
-  image: `https://picsum.photos/400/200?random=${index}`,
-  tags: ['React', 'TypeScript', 'Web Development']
-}));
-
 const ResourcesPage: React.FC = () => {
-  const [postsData, setPostsData] = useState<Post[]>(posts);
+  const [postsData, setPostsData] = useState<Post[]>([]);
   
   const handleContactClick = () => {
     console.log('Contact button clicked');
@@ -54,13 +44,33 @@ const ResourcesPage: React.FC = () => {
   const row1Ref = useRef<HTMLDivElement>(null);
   const row2Ref = useRef<HTMLDivElement>(null);
 
-  // Efecto para verificar la posición inicial del scroll
-  useEffect(() => {
-    checkScrollPosition();
-    // Agregar listener para el evento de redimensionamiento
-    window.addEventListener('resize', checkScrollPosition);
-    return () => window.removeEventListener('resize', checkScrollPosition);
-  }, []);
+// Al montar, traemos los links desde tu API
+useEffect(() => {
+  fetch(`${API_BASE}/links`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Error al cargar links (${res.status})`);
+      return res.json();
+    })
+    .then((links: any[]) => {
+      const mapped: Post[] = links.map((l) => ({
+        id:      l._id,                                                // string
+        title:   l.title,
+        excerpt: (l.description || '').slice(0, 100) + '...',          // toma los primeros 100 caracteres
+        date:    new Date(l.createdAt || Date.now()).toLocaleDateString(),
+        visits:  typeof l.visits === 'number' ? l.visits : 0,         // fallback a 0
+        likes:   typeof l.likes  === 'number' ? l.likes  : 0,         // fallback a 0
+        isLiked: false,                                               // controla localmente
+        image:   l.image ? l.image : '/devpendenciasIMG/placeholder.png',
+        tags:    Array.isArray(l.tags) ? l.tags : [l.tags || 'Sin categoría']
+      }));
+      setPostsData(mapped);
+    })
+    .catch(err => {
+      console.error('Error cargando posts:', err);
+      // opcional: mostrar alerta al usuario
+    });
+}, []);
+
 
   // Función para verificar la posición del scroll
   const checkScrollPosition = () => {
@@ -114,24 +124,57 @@ const ResourcesPage: React.FC = () => {
     console.log('Publish button clicked');
     setShowLoginForm(true);
   };
+const viewDetails = async (postId: string) => {
+  const post = postsData.find(p => p.id === postId);
+  if (!post) return;
+  const newVisits = post.visits + 1;
+
+  // 1) Actualizar visits en la DB
+  await fetch(`${API_BASE}/links/${postId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visits: newVisits })
+  });
+
+  // 2) Actualizar localmente
+  setPostsData(current =>
+    current.map(p =>
+      p.id === postId
+        ? { ...p, visits: newVisits }
+        : p
+    )
+  );
+
+  // 3) Luego puedes redirigir / mostrar detalles
+  // navigate(`/links/${postId}`); // si usas react-router
+};
 
   const handleCloseLoginForm = () => {
     setShowLoginForm(false);
   };
   
-  const toggleLike = (postId: number) => {
-    setPostsData((currentPosts: Post[]) => 
-      currentPosts.map((post: Post) => 
-        post.id === postId 
-          ? { 
-              ...post, 
-              isLiked: !post.isLiked, 
-              likes: post.isLiked ? post.likes - 1 : post.likes + 1 
-            } 
-          : post
-      )
-    );
-  };
+const toggleLike = async (postId: string) => {
+  const post = postsData.find(p => p.id === postId);
+  if (!post) return;
+  const newLikes = post.isLiked ? post.likes - 1 : post.likes + 1;
+
+  const res = await fetch(`${API_BASE}/links/${postId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ likes: newLikes })
+  });
+  if (!res.ok) {
+    console.error('Error actualizando likes');
+    return;
+  }
+  setPostsData(current =>
+    current.map(p =>
+      p.id === postId
+        ? { ...p, likes: newLikes, isLiked: !p.isLiked }
+        : p
+    )
+  );
+};
 
   return (
     <div className="resources-container">
@@ -302,9 +345,12 @@ const ResourcesPage: React.FC = () => {
                   ))}
                 </div>
                 
-                <button className="details-button">
-                  Ver detalles
-                </button>
+                 <button 
+   className="details-button"
+   onClick={() => viewDetails(post.id)}
+ >
+   Ver detalles
+ </button>
               </div>
             </article>
           ))}

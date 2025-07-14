@@ -1,12 +1,14 @@
 // models/Link.js
 import mongoose from 'mongoose';
 
-const schema = new mongoose.Schema({
-  title:       { type: String, required: true, trim: true },
-  description: String,
-  image:       String,
-  url:         { type: String, required: true, trim: true },
-  tags:        [String]
+const linkSchema = new mongoose.Schema({
+  title:       { type: String, required: true },
+  description: { type: String },
+  url:         { type: String, required: true },
+  image:       { type: String },
+  tags:        { type: [String], default: [] },
+  visits:      { type: Number, default: 0 },  // ← nuevo
+  likes:       { type: Number, default: 0 }   // ← nuevo
 }, { timestamps: true });
 
-export default mongoose.model('Link', schema);
+export default mongoose.model('Link', linkSchema);

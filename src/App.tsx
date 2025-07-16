@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import WelcomePage from './components/WelcomePage/WelcomePage';
 import ResourcesPage from './components/ResourcesPage/ResourcesPage';
 import AdminPanel from './components/admin/AdminPanel';
+import Article from './components/Article/Article';
+
 import './App.css';
 
 function App() {
@@ -11,6 +13,8 @@ function App() {
         <Routes>
           <Route path="/" element={<WelcomePage />} />
           <Route path="/recursos" element={<ResourcesPage />} />
+          <Route path="/recursos" element={<ResourcesPage />} />
+          <Route path="/recursos/:id" element={<Article />} /> 
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

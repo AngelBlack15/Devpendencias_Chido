@@ -1,30 +1,56 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// src/components/Article/Article.tsx
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import './Article.css';
 
-interface ArticleProps {
+interface Post {
+  id: string;
   title: string;
   description: string;
-  imageUrl: string;
+  image: string;
   tags: string[];
   url: string;
 }
 
-const Article: React.FC<ArticleProps> = ({ title, description, imageUrl, tags, url }) => {
+const API_BASE = 'http://localhost:3000/api';
+
+const Article: React.FC = () => {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const params = useParams<{ id: string }>();
+  const [post, setPost] = useState<Post | null>(state?.post || null);
+
+  // Si no venía en state, lo buscamos por ID
+  useEffect(() => {
+    if (!post && params.id) {
+      fetch(`${API_BASE}/links/${params.id}`)
+        .then(res => res.json())
+        .then((l: any) => {
+          setPost({
+            id: l._id,
+            title: l.title,
+            description: l.description,
+            image: l.image || '/devpendenciasIMG/placeholder.png',
+            tags: Array.isArray(l.tags) ? l.tags : [l.tags || 'Sin categoría'],
+            url: l.url
+          });
+        })
+        .catch(console.error);
+    }
+  }, [params.id, post]);
+
+  if (!post) return <p>Cargando artículo…</p>;
 
   const handleBackToResources = () => {
-    navigate('/resources');
+    navigate('/recursos');
   };
 
   const handleContactClick = () => {
-    // Aquí irá la lógica para el botón de contacto
     console.log('Contacto clickeado');
   };
 
   return (
     <div className="article-container">
-      {/* Header con logo y botón de contacto */}
       <header className="article-header">
         <div className="logo-container" onClick={handleBackToResources}>
           <img 
@@ -38,37 +64,32 @@ const Article: React.FC<ArticleProps> = ({ title, description, imageUrl, tags, u
         </button>
       </header>
 
-      {/* Contenido principal del artículo */}
       <main className="article-content">
-        <h1 className="article-title">{title}</h1>
+        <h1 className="article-title">{post.title}</h1>
         
-        {/* Etiquetas */}
         <div className="article-tags">
-          {tags.map((tag, index) => (
-            <span key={index} className="tag">{tag}</span>
+          {post.tags.map((tag, i) => (
+            <span key={i} className="tag">{tag}</span>
           ))}
         </div>
 
-        {/* Descripción */}
         <div className="article-description">
-          <p>{description}</p>
+          <p>{post.description}</p>
         </div>
 
-        {/* Imagen */}
-        {imageUrl && (
+        {post.image && (
           <div className="article-image-container">
             <img 
-              src={imageUrl} 
-              alt={title} 
+              src={post.image} 
+              alt={post.title} 
               className="article-image"
             />
           </div>
         )}
 
-        {/* Botón de acción */}
         <div className="article-actions">
           <a 
-            href={url} 
+            href={post.url} 
             target="_blank" 
             rel="noopener noreferrer"
             className="visit-button"
